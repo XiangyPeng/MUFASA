@@ -1,4 +1,4 @@
-# MUFASA: Multi-view Fusion and Adaptation Network with Spatial Awareness for Radar Object Detection
+# [ICANN 2024] MUFASA: Multi-view Fusion and Adaptation Network with Spatial Awareness for Radar Object Detection
 
 ![motivation](https://s2.loli.net/2025/05/14/oS8UYNJdnyxDKWu.png)
 
