@@ -1,18 +1,18 @@
 # [ICANN 2024] MUFASA: Multi-view Fusion and Adaptation Network with Spatial Awareness for Radar Object Detection
 
-![motivation](https://s2.loli.net/2025/05/14/oS8UYNJdnyxDKWu.png)
 
 ## Abstract
 
 In recent years, approaches based on radar object detection have made significant progress in autonomous driving systems due to their robustness under adverse weather compared to LiDAR. However, the sparsity of radar point clouds poses challenges in achieving precise object detection, highlighting the importance of effective and comprehensive feature extraction technologies. To address this challenge, this paper introduces a comprehensive feature extraction method for radar point clouds. This study first enhances the capability of detection networks by using a plug-and-play module, GeoSPA. It leverages the Lalonde features to explore local geometric patterns. Additionally, a distributed multi-view attention mechanism, DEMVA, is designed to integrate the shared information across the entire dataset with the global information of each individual frame. By employing the two modules, we present our method, MUFASA, which enhances object detection performance through improved feature extraction. The approach is evaluated on the VoD and TJ4DRaDSet datasets to demonstrate its effectiveness. In particular, we achieve state-of-the-art results among radar-based methods on the VoD dataset with the mAP of 50.24%
 
 ## Architecture
+<img width="1049" height="356" alt="image" src="https://github.com/user-attachments/assets/c9ac25ce-98fb-4ac1-bf7c-c69f750b6391" />
 
-![arch-1](https://s2.loli.net/2025/05/14/CNzcgHtKI6hD7wl.png)
 
 ## Result
 
-![mre-1](https://s2.loli.net/2025/05/14/yahgYjicSIkmn5E.png)
+<img width="1043" height="739" alt="image" src="https://github.com/user-attachments/assets/c05b687f-c34b-4b23-afc7-7ec36b1d7f98" />
+
 
 ## Installation
 
