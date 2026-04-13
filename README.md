@@ -14,18 +14,18 @@ In recent years, approaches based on radar object detection have made significan
 
 ![mre-1](https://s2.loli.net/2025/05/14/yahgYjicSIkmn5E.png)
 
-## Getting Started
+## Installation
 
 The implementation is based on [OpenPCDet](https://github.com/open-mmlab/OpenPCDet).
-
-### Installation
-
 Please refer to this file ([Installation](https://github.com/open-mmlab/OpenPCDet/blob/master/docs/INSTALL.md)) to install the latest version of OpenPCDet.
+git clone  https://github.com/XiangyPeng/MUFASA.git
+cd MUFASA
+pip install -r requirement.txt
 
 ### Dataset Preparation
 
-Please refer to this file ([Dataset Preparation](https://github.com/tudelft-iv/view-of-delft-dataset)) to prepare VoD dataset. 
-Please refer to this file ([Dataset Preparation](https://github.com/TJRadarLab/TJ4DRadSet)) to prepare TJ4DRadSet dataset.
+Please refer to this file ([Dataset Preparation](https://github.com/tudelft-iv/view-of-delft-dataset)) to download and prepare VoD dataset. 
+Please refer to this file ([Dataset Preparation](https://github.com/TJRadarLab/TJ4DRadSet)) to download and prepare TJ4DRadSet dataset.
 
 
 ## Citation
