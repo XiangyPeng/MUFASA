@@ -28,7 +28,7 @@ Please refer to this file ([Dataset Preparation](https://github.com/tudelft-iv/v
 Please refer to this file ([Dataset Preparation](https://github.com/TJRadarLab/TJ4DRadSet)) to prepare TJ4DRadSet dataset.
 
 
-## BibTex
+## Citation
 
 If you find this work helpful for your research, please consider citing the following entry:
 
