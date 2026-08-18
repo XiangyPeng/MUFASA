@@ -1,5 +1,23 @@
 # [ICANN 2024] MUFASA: Multi-view Fusion and Adaptation Network with Spatial Awareness for Radar Object Detection
 
+## Delivery Overview
+
+This repository is prepared for handover and team delivery.
+It contains the MUFASA implementation, training/evaluation scripts, and dataset configuration files on top of OpenPCDet.
+
+### Delivery Status
+
+- Repository cleaned for delivery (no tracked Chinese text, no local editor artifacts, no generated `.so` binaries).
+- Duplicate `copy` files removed from version control.
+- Evaluation helper import issues fixed.
+- Core Python source compiles successfully with `python -m compileall`.
+
+### Tech Stack
+
+- Base framework: [OpenPCDet](https://github.com/open-mmlab/OpenPCDet)
+- Language: Python
+- Main module: `pcdet/`
+- Entry scripts: `tools/train.py`, `tools/test.py`, `tools/demo.py`
 
 ## Abstract
 
@@ -19,14 +37,58 @@ In recent years, approaches based on radar object detection have made significan
 ### Environment Setting
 - The implementation is based on [OpenPCDet](https://github.com/open-mmlab/OpenPCDet).
 - Please refer to this file ([Installation](https://github.com/open-mmlab/OpenPCDet/blob/master/docs/INSTALL.md)) to install the latest version of OpenPCDet.
-- git clone  https://github.com/XiangyPeng/MUFASA.git
-- cd MUFASA
-- pip install -r requirement.txt
+- Clone repository:
+
+```bash
+git clone https://github.com/XiangyPeng/MUFASA.git
+cd MUFASA
+```
+
+- Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+- Build extensions / install in development mode:
+
+```bash
+python setup.py develop
+```
 
 ### Dataset Preparation
 
 - Please refer to this file ([Dataset Preparation](https://github.com/tudelft-iv/view-of-delft-dataset)) to download and prepare VoD dataset. 
 - Please refer to this file ([Dataset Preparation](https://github.com/TJRadarLab/TJ4DRadSet)) to download and prepare TJ4DRadSet dataset.
+
+## Quick Start
+
+Train (example):
+
+```bash
+python tools/train.py --cfg_file tools/cfgs/kitti_models/pv_rcnn_radar.yaml
+```
+
+Evaluate (example):
+
+```bash
+python tools/test.py --cfg_file tools/cfgs/kitti_models/pv_rcnn_radar.yaml --ckpt <path_to_checkpoint>
+```
+
+## Repository Layout
+
+- `pcdet/`: core models, datasets, ops, and utilities
+- `tools/cfgs/`: model and dataset configuration files
+- `tools/train.py`: training entry
+- `tools/test.py`: evaluation entry
+- `tools/process_tools/`: data preparation helpers
+
+## Handover Notes
+
+- Recommended Python version: 3.10 for broader compatibility with common OpenPCDet dependency sets.
+- CUDA/PyTorch compatibility must be aligned before building extensions.
+- Dataset paths and training options are configured through YAML files under `tools/cfgs/`.
+- For reproducibility, keep config, checkpoint, and commit hash recorded together.
 
 
 ## Citation
