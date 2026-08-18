@@ -144,8 +144,8 @@ class QueryAndGroup_pattern(nn.Module):
         grouped_xyz = grouping_operation(xyz, xyz_batch_cnt, idx, new_xyz_batch_cnt)  # (M1 + M2, 3, nsample)
         grouped_xyz -= new_xyz.unsqueeze(-1)
 
-        # 相对坐标还是绝对坐标里面计算出来的
-        grouped_xyz[empty_ball_mask] = 0  # 没有邻域点的邻域点都为0，当然这是在相对位置的坐标下  [B,xyz,nsample]
+        # 
+        grouped_xyz[empty_ball_mask] = 0  # 0  [B,xyz,nsample]
 
         b, c, k = grouped_xyz.size()
 
@@ -161,7 +161,7 @@ class QueryAndGroup_pattern(nn.Module):
         
         if features is not None:
             grouped_features = grouping_operation(features, xyz_batch_cnt, idx, new_xyz_batch_cnt)  # (M1 + M2, C, nsample)
-            grouped_features[empty_ball_mask] = 0 # 没有邻域点的邻域点特征都为0，当然这是在相对位置的坐标下
+            grouped_features[empty_ball_mask] = 0 # 0
             if self.use_xyz:
                 new_features = torch.cat([grouped_xyz, grouped_features], dim=1)  # (M1 + M2 ..., C + 3, nsample)
             else:

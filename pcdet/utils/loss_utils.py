@@ -7,7 +7,7 @@ from . import box_utils
 from pcdet.ops.iou3d_nms import iou3d_nms_utils
 
 
-class SigmoidFocalClassificationLoss(nn.Module):#分类损失
+class SigmoidFocalClassificationLoss(nn.Module):#
     """
     Sigmoid focal cross entropy loss.
     """
@@ -73,7 +73,7 @@ class SigmoidFocalClassificationLoss(nn.Module):#分类损失
         return loss * weights
 
 
-class WeightedSmoothL1Loss(nn.Module): #定位损失
+class WeightedSmoothL1Loss(nn.Module): #
     """
     Code-wise Weighted Smooth L1 Loss modified based on fvcore.nn.smooth_l1_loss
     https://github.com/facebookresearch/fvcore/blob/master/fvcore/nn/smooth_l1_loss.py
@@ -137,7 +137,7 @@ class WeightedSmoothL1Loss(nn.Module): #定位损失
         return loss
 
 
-class WeightedL1Loss(nn.Module):# 方向损失
+class WeightedL1Loss(nn.Module):# 
     def __init__(self, code_weights: list = None):
         """
         Args:

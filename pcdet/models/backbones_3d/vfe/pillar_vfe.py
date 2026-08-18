@@ -7,7 +7,7 @@ from .vfe_template import VFETemplate
 
 
 #  [x,y,z,Vr,range,power,alpha,beta], and we only used the dimensions of [0,1,2,3,5].
-# [0,1,2,3,5]：[x,y,z,Vr,power]
+# [0,1,2,3,5][x,y,z,Vr,power]
 class RadarTJ4DPillarVFE(VFETemplate):
     def __init__(self, model_cfg, num_point_features, voxel_size, point_cloud_range, **kwargs):
         super().__init__(model_cfg=model_cfg)
@@ -20,7 +20,7 @@ class RadarTJ4DPillarVFE(VFETemplate):
 
         ## check if config has the correct params, if not, throw exception
         # radar_config_params = ["USE_RCS", "USE_VR", "USE_VR_COMP", "USE_TIME", "USE_ELEVATION"]
-        # 换成 ['x', 'y', 'z', 'vr','power']
+        #  ['x', 'y', 'z', 'vr','power']
         radar_config_params = ["USE_VR","USE_RCS"]
 
         if all(hasattr(self.model_cfg, attr) for attr in radar_config_params):
@@ -34,7 +34,7 @@ class RadarTJ4DPillarVFE(VFETemplate):
             raise Exception("config does not have the right parameters, please use a radar config")
 
         # self.available_features = ['x', 'y', 'z', 'rcs', 'v_r', 'v_r_comp', 'time']
-        # 换成
+        # 
         self.available_features = ['x', 'y', 'z', 'v_r', 'rcs']
 
 
@@ -127,14 +127,14 @@ class RadarTJ4DPillarVFE(VFETemplate):
         #     voxel_features[:, :, self.z_ind] = 0  # set z to zero before doing anything
         
         orig_xyz = voxel_features[:, :, :self.z_ind + 1]  # selecting x y z
-        # 求每个voxle的平均值(31530, 1, 3)--> (31530, 1, 3) / (31530, 1, 1)
-        # 被求和的维度，在求和后会变为1，如果没有keepdim=True的设置，python会默认压缩该维度，比如变为[31530, 3]
-        # view扩充维度
+        # voxle(31530, 1, 3)--> (31530, 1, 3) / (31530, 1, 1)
+        # 1keepdim=Truepython[31530, 3]
+        # view
         # calculate mean of points in pillars for x y z and save the offset from the mean
         # Note: they do not take the mean directly, as each pillar is filled up with 0-s. Instead, they sum and divide by num of points
         points_mean = orig_xyz.sum(dim=1, keepdim=True) / voxel_num_points.type_as(voxel_features).view(-1, 1, 1)
         f_cluster = orig_xyz - points_mean  # offset from cluster mean
-        #  coords是网格点坐标，不是实际坐标，乘以voxel大小再加上偏移量是恢复网格中心点实际坐标
+        #  coordsvoxel
         # calculate center for each pillar and save points' offset from the center. voxel_coordinate * voxel size + offset should be the center of pillar (coords are indexed backwards)
         f_center = torch.zeros_like(orig_xyz)
         f_center[:, :, 0] = voxel_features[:, :, self.x_ind] - (
@@ -145,9 +145,9 @@ class RadarTJ4DPillarVFE(VFETemplate):
                     coords[:, 1].to(voxel_features.dtype).unsqueeze(1) * self.voxel_z + self.z_offset)
 
         voxel_features = voxel_features[:, :, self.selected_indexes]  # filtering for used features
-        # 如果使用绝对坐标，直接组合
+        # 
         features = [voxel_features, f_cluster, f_center]
-        # 如果使用距离信息
+        # 
         if self.with_distance:  # if with_distance is true, include range to the points as well
             points_dist = torch.norm(orig_xyz, 2, 2, keepdim=True)  # first 2: L2 norm second 2: along 2. dim
             features.append(points_dist)

@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 
-class HeightCompression(nn.Module): # 拍成BEV
+class HeightCompression(nn.Module): # BEV
     def __init__(self, model_cfg, **kwargs):
         super().__init__()
         self.model_cfg = model_cfg

@@ -52,3 +52,13 @@ Many thanks to these excellent works and repos:
 - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet/tree/master)
 - [View-of-Delft](https://github.com/tudelft-iv/view-of-delft-dataset)
 - [TJ4DRadSet](https://github.com/TJRadarLab/TJ4DRadSet)
+
+## Repository Delivery Notes
+
+This repository has been cleaned for handover:
+- Removed generated binaries (`*.so`) from version control.
+- Removed local packaging metadata (`pcdet.egg-info`).
+- Removed editor-specific launch settings (`tools/.vscode/launch.json`).
+- Removed duplicate `copy` files that were not part of the production code path.
+- Normalized file names and comments to avoid Chinese characters in tracked source files.
+- Fixed two syntax issues in evaluation helper modules.

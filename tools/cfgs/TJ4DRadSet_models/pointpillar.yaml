@@ -14,7 +14,7 @@ DATA_CONFIG:
           }
 
         - NAME: transform_points_to_voxels
-          VOXEL_SIZE: [0.05, 0.05, 4]  # 这个5还是4都是另说
+          VOXEL_SIZE: [0.05, 0.05, 4]  # 54
           MAX_POINTS_PER_VOXEL: 10
           MAX_NUMBER_OF_VOXELS: {
             'train': 16000,
@@ -40,7 +40,7 @@ MODEL:
         USE_VR: True
         USE_NORM: True
         USE_DISTANCE: False
-        #  下面三个是pointpillar本身的
+        #  pointpillar
         WITH_DISTANCE: False
         USE_ABSLOTE_XYZ: True
         NUM_FILTERS: [64]

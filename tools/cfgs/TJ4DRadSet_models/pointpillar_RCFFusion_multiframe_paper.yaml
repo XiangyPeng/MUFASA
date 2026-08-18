@@ -41,7 +41,7 @@ MODEL:
         USE_VR: True
         USE_NORM: True
         USE_DISTANCE: False
-        #  下面三个是pointpillar本身的
+        # The next three options are standard PointPillar settings.
         WITH_DISTANCE: False
         USE_ABSLOTE_XYZ: True
         NUM_FILTERS: [64]

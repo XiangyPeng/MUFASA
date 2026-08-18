@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-class PointPillarScatter(nn.Module): #将pillar拍成BEV
+class PointPillarScatter(nn.Module): #pillarBEV
     def __init__(self, model_cfg, grid_size, **kwargs):
         super().__init__()
 
@@ -14,8 +14,8 @@ class PointPillarScatter(nn.Module): #将pillar拍成BEV
     def forward(self, batch_dict, **kwargs):
 
         '''
-        batch_dict['pillar_features']-->为VFE得到的数据(M, 64)
-        voxel_coords:(M,4) --> (batch_index,z,y,x) batch_index代表了该点云数据在当前batch中的index
+        batch_dict['pillar_features']-->VFE(M, 64)
+        voxel_coords:(M,4) --> (batch_index,z,y,x) batch_indexbatchindex
         '''
 
         pillar_features, coords = batch_dict['pillar_features'], batch_dict['voxel_coords']

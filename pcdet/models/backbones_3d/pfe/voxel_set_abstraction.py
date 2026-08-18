@@ -197,7 +197,7 @@ class VoxelSetAbstraction(nn.Module):
             cur_x_idxs = x_idxs[bs_mask]
             cur_y_idxs = y_idxs[bs_mask]
             cur_bev_features = bev_features[k].permute(1, 2, 0)  # (H, W, C)
-            point_bev_features = bilinear_interpolate_torch(cur_bev_features, cur_x_idxs, cur_y_idxs)  # 从BEV得到每个点对应的BEV特征
+            point_bev_features = bilinear_interpolate_torch(cur_bev_features, cur_x_idxs, cur_y_idxs)  # BEVBEV
             point_bev_features_list.append(point_bev_features)
 
         point_bev_features = torch.cat(point_bev_features_list, dim=0)  # (N1 + N2 + ..., C)
@@ -250,7 +250,7 @@ class VoxelSetAbstraction(nn.Module):
         for bs_idx in range(batch_size):
             bs_mask = (batch_indices == bs_idx)
             sampled_points = src_points[bs_mask].unsqueeze(dim=0)  # (1, N, 3)
-            if self.model_cfg.SAMPLE_METHOD == 'FPS':  # 所以个数不够，多的点就是属于重复采样
+            if self.model_cfg.SAMPLE_METHOD == 'FPS':  # 
                 cur_pt_idxs = pointnet2_stack_utils.farthest_point_sample(
                     sampled_points[:, :, 0:3].contiguous(), self.model_cfg.NUM_KEYPOINTS
                 ).long()
@@ -350,10 +350,10 @@ class VoxelSetAbstraction(nn.Module):
             point_coords: (N, 4)
 
         """
-        keypoints = self.get_sampled_points(batch_dict)  # 2048个点，感觉应该可以少点
+        keypoints = self.get_sampled_points(batch_dict)  # 2048
 
-        point_features_list = []  #  相当于对每个点从不同角度的特征进行聚合
-        if 'bev' in self.model_cfg.FEATURES_SOURCE:  # 这是从BEV的角度里面拿到点特征
+        point_features_list = []  #  
+        if 'bev' in self.model_cfg.FEATURES_SOURCE:  # BEV
             point_bev_features = self.interpolate_from_bev_features(
                 keypoints, batch_dict['spatial_features'], batch_dict['batch_size'],
                 bev_stride=batch_dict['spatial_features_stride']
@@ -369,7 +369,7 @@ class VoxelSetAbstraction(nn.Module):
 
         if 'raw_points' in self.model_cfg.FEATURES_SOURCE:
             raw_points = batch_dict['points']
-            # 与原始点云做了一个 Pointnet++的操作
+            #  Pointnet++
             pooled_features = self.aggregate_keypoint_features_from_one_source(
                 batch_size=batch_size, aggregate_func=self.SA_rawpoints,
                 xyz=raw_points[:, 1:4],
@@ -386,11 +386,11 @@ class VoxelSetAbstraction(nn.Module):
             cur_coords = batch_dict['multi_scale_3d_features'][src_name].indices
             cur_features = batch_dict['multi_scale_3d_features'][src_name].features.contiguous()
 
-            xyz = common_utils.get_voxel_centers(  # 得到对应的voxel的中心点
+            xyz = common_utils.get_voxel_centers(  # voxel
                 cur_coords[:, 1:4], downsample_times=self.downsample_times_map[src_name],
                 voxel_size=self.voxel_size, point_cloud_range=self.point_cloud_range
             )
-            # 再进行 PointNet++ 网络学习
+            #  PointNet++ 
             pooled_features = self.aggregate_keypoint_features_from_one_source(
                 batch_size=batch_size, aggregate_func=self.SA_layers[k],
                 xyz=xyz.contiguous(), xyz_features=cur_features, xyz_bs_idxs=cur_coords[:, 0],
@@ -404,9 +404,9 @@ class VoxelSetAbstraction(nn.Module):
 
         point_features = torch.cat(point_features_list, dim=-1)
 
-        batch_dict['point_features_before_fusion'] = point_features.view(-1, point_features.shape[-1])  #没有融合之前
+        batch_dict['point_features_before_fusion'] = point_features.view(-1, point_features.shape[-1])  #
         point_features = self.vsa_point_feature_fusion(point_features.view(-1, point_features.shape[-1]))
 
         batch_dict['point_features'] = point_features  # (BxN, C)
-        batch_dict['point_coords'] = keypoints  # (BxN, 4)   # 关键点的信息和对应的特征
+        batch_dict['point_coords'] = keypoints  # (BxN, 4)   # 
         return batch_dict

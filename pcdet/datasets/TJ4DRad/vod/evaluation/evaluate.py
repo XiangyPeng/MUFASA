@@ -56,7 +56,7 @@ class Evaluation:
 
         return evaluation_result
     
-    # 原始方法
+    # 
     # def evaluate(self,
     #              result_path,
     #              current_class=None,

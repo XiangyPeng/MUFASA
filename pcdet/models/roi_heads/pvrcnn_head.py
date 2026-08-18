@@ -9,7 +9,7 @@ class PVRCNNHead(RoIHeadTemplate):
     def __init__(self, input_channels, model_cfg, num_class=1, **kwargs):
         super().__init__(num_class=num_class, model_cfg=model_cfg)
         self.model_cfg = model_cfg
-        #  原始的
+        #  
         # self.roi_grid_pool_layer, num_c_out = pointnet2_stack_modules.build_local_aggregation_module(
         #     input_channels=input_channels, config=self.model_cfg.ROI_GRID_POOL
         # )
@@ -79,28 +79,28 @@ class PVRCNNHead(RoIHeadTemplate):
         """
         batch_size = batch_dict['batch_size']
         rois = batch_dict['rois']
-        point_coords = batch_dict['point_coords']  # Keypoint 的点和下面对应的特征
+        point_coords = batch_dict['point_coords']  # Keypoint 
         point_features = batch_dict['point_features']
 
-        point_features = point_features * batch_dict['point_cls_scores'].view(-1, 1) # 对前景点和背景点利用加权的想法来感知
-        # 对ROI内进行点的采样，有规则采样
+        point_features = point_features * batch_dict['point_cls_scores'].view(-1, 1) # 
+        # ROI
         global_roi_grid_points, local_roi_grid_points = self.get_global_grid_points_of_roi(
             rois, grid_size=self.model_cfg.ROI_GRID_POOL.GRID_SIZE
         )  # (BxN, 6x6x6, 3)
-        global_roi_grid_points = global_roi_grid_points.view(batch_size, -1, 3)  # (B, Nx6x6x6, 3)  # 128个点
+        global_roi_grid_points = global_roi_grid_points.view(batch_size, -1, 3)  # (B, Nx6x6x6, 3)  # 128
 
         xyz = point_coords[:, 1:4]
         xyz_batch_cnt = xyz.new_zeros(batch_size).int()
         batch_idx = point_coords[:, 0]
         for k in range(batch_size):
             xyz_batch_cnt[k] = (batch_idx == k).sum()
-        # 对keypoint点位置和特征和前面global_roi_grid_points的点位置进行特征学习
+        # keypointglobal_roi_grid_points
         new_xyz = global_roi_grid_points.view(-1, 3)
         new_xyz_batch_cnt = xyz.new_zeros(batch_size).int().fill_(global_roi_grid_points.shape[1])
-        pooled_points, pooled_features = self.roi_grid_pool_layer(  # PointNet++操作
+        pooled_points, pooled_features = self.roi_grid_pool_layer(  # PointNet++
             xyz=xyz.contiguous(),
             xyz_batch_cnt=xyz_batch_cnt,
-            new_xyz=new_xyz, # 到时候出来的就是这个点的坐标数量
+            new_xyz=new_xyz, # 
             new_xyz_batch_cnt=new_xyz_batch_cnt,
             features=point_features.contiguous(),
         )  # (M1 + M2 ..., C)
@@ -114,14 +114,14 @@ class PVRCNNHead(RoIHeadTemplate):
     def get_global_grid_points_of_roi(self, rois, grid_size):
         rois = rois.view(-1, rois.shape[-1])
         batch_size_rcnn = rois.shape[0]
-        # 对ROI内进行采样  规则采样，可以理解为虚拟点
+        # ROI  
         local_roi_grid_points = self.get_dense_grid_points(rois, batch_size_rcnn, grid_size)  # (B, 6x6x6, 3)
-        global_roi_grid_points = common_utils.rotate_points_along_z(  # 采样的点方向与ROI方向对齐
+        global_roi_grid_points = common_utils.rotate_points_along_z(  # ROI
             local_roi_grid_points.clone(), rois[:, 6]
         ).squeeze(dim=1)
-        global_center = rois[:, 0:3].clone() # 框的中心点
-        global_roi_grid_points += global_center.unsqueeze(dim=1) # ROI的在全局坐标系中的位置
-        return global_roi_grid_points, local_roi_grid_points   # ROI在全局和局部坐标系中的位置
+        global_center = rois[:, 0:3].clone() # 
+        global_roi_grid_points += global_center.unsqueeze(dim=1) # ROI
+        return global_roi_grid_points, local_roi_grid_points   # ROI
 
     @staticmethod
     def get_dense_grid_points(rois, batch_size_rcnn, grid_size):
@@ -151,7 +151,7 @@ class PVRCNNHead(RoIHeadTemplate):
                 batch_dict['roi_labels'] = targets_dict['roi_labels']
 
         # RoI aware pooling
-        pooled_features = self.roi_grid_pool(batch_dict)  # (BxN, 6x6x6, C)  #  6x6x6 可以视为框里面的216个虚拟点的特征，用这个216个点的特征来代表框的特征
+        pooled_features = self.roi_grid_pool(batch_dict)  # (BxN, 6x6x6, C)  #  6x6x6 216216
 
         grid_size = self.model_cfg.ROI_GRID_POOL.GRID_SIZE
         batch_size_rcnn = pooled_features.shape[0]

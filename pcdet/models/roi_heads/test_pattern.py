@@ -5,7 +5,7 @@ from torch.autograd import Function
 class ComputeLFeaturesFunction(Function):
    @staticmethod
    def forward(ctx, points, radius):
-       # 使用BallTree搜索邻域内的点
+       # BallTree
        tree = BallTree(points)
        idx = tree.query_radius(points, r=radius)
        L1_arr, L2_arr, L3_arr = [], [], []
@@ -43,13 +43,13 @@ class ComputeLFeaturesFunction(Function):
        points, idx, radius = ctx.saved_tensors
        grad_points = torch.zeros_like(points)
 
-       # 计算梯度
+       # 
        for i in range(len(points)):
            neighbors = points[idx[i]]
            if neighbors.shape[0] < 2:
                continue
 
-           # 计算梯度
+           # 
            cov_matrix_grad = torch.zeros_like(cov_matrix)
            d1, d2, d3 = torch.sorted(torch.eigvalsh(cov_matrix), dim=-1, descending=True)
            sum_d = d1 + d2 + d3
@@ -57,7 +57,7 @@ class ComputeLFeaturesFunction(Function):
            d2_grad = torch.sum(grad_L2[i] * (2 * (d1 - d2) / sum_d - 1))
            d3_grad = torch.sum(grad_L3[i] * (2 * (d2 - d3) / sum_d - 1))
 
-           # 更新邻域内点的梯度
+           # 
            grad_points[idx[i]] += torch.matmul(neighbors.t(), cov_matrix_grad)
 
        return grad_points, None

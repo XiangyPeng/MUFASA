@@ -25,7 +25,7 @@ class TJ4DRadKittiDataset(DatasetTemplate):
         )
         self.split = self.dataset_cfg.DATA_SPLIT[self.mode]
         # self.root_split_path = self.root_path / ('training' if self.split != 'test' else 'testing')
-        # 这里的都在training里面
+        # training
         self.root_split_path = self.root_path / 'training' 
 
         split_dir = self.root_path / 'ImageSets' / (self.split + '.txt')
@@ -64,14 +64,14 @@ class TJ4DRadKittiDataset(DatasetTemplate):
         self.sample_id_list = [x.strip() for x in open(split_dir).readlines()] if split_dir.exists() else None
     def get_lidar(self, idx):
         #  [x,y,z,Vr,range,power,alpha,beta], and we only used the dimensions of [0,1,2,3,5].
-        # [0,1,2,3,5]：[x,y,z,Vr,power]
+        # [0,1,2,3,5][x,y,z,Vr,power]
         number_of_channels = 8  # [x,y,z,Vr,power]
         lidar_file = self.root_split_path / 'velodyne' / ('%s.bin' % idx)
         
         points = np.fromfile(str(lidar_file), dtype=np.float32).reshape(-1, number_of_channels)
 
         points=  points[:,[0,1,2,3,5]]
-        # 8个取5个
+        # 85
 
         # # replace the list values with statistical values; for x, y, z and time, use 0 and 1 as means and std to avoid normalization
         # means = [0, 0, 0, 0, 0]  # [x,y,z,Vr,power]
@@ -90,7 +90,7 @@ class TJ4DRadKittiDataset(DatasetTemplate):
 
         return points
         
-        # 原始的版本
+        # 
         # lidar_file = self.root_split_path / 'velodyne' / ('%s.bin' % idx)
         # assert lidar_file.exists()
         # get_data =np.fromfile(str(lidar_file), dtype=np.float32).reshape(-1, 4)
@@ -101,7 +101,7 @@ class TJ4DRadKittiDataset(DatasetTemplate):
     #     lidar_file = self.root_split_path / 'velodyne' / ('%s.bin' % idx)
     #     assert lidar_file.exists()
     #     return np.fromfile(str(lidar_file), dtype=np.float32).reshape(-1, 4)
-    # # 没有图像
+    # # 
     def get_image(self, idx):
         """
         Loads image for a sample
@@ -117,7 +117,7 @@ class TJ4DRadKittiDataset(DatasetTemplate):
         # image /= 255.0
         # return image
         return np.zeros([1216,1936,3], dtype=np.float32)
-    # 没有图像
+    # 
     def get_image_shape(self, idx):
         return np.array([1216,1936], dtype=np.int32)
         # img_file = self.root_split_path / 'image_2' / ('%s.jpg' % idx)
@@ -396,12 +396,12 @@ class TJ4DRadKittiDataset(DatasetTemplate):
 
         from .TJ4Deval import TJ4Deval  as TJ4Deval_eval 
         from .kitti_object_eval_python import eval as kitti_eval
-        # vod 数据集的
+        # vod 
         import os
     
         eval_det_annos = copy.deepcopy(det_annos) ###################
         eval_gt_annos = [copy.deepcopy(info['annos']) for info in self.kitti_infos]
-        ap_result_str, ap_dict = kitti_eval.get_official_eval_result(eval_gt_annos, eval_det_annos, class_names) # 直接就计算了，不需要图像
+        ap_result_str, ap_dict = kitti_eval.get_official_eval_result(eval_gt_annos, eval_det_annos, class_names) # 
         
        
         eval_det_annos2 = copy.deepcopy(det_annos)
@@ -529,8 +529,8 @@ def maintest(args):
     
     # parser = argparse.ArgumentParser(description='arg parser')
     # parser.add_argument('--cfg_file', type=str, default=None, help='specify the config of dataset')
-    # parser.add_argument('--func', type=str, default='create_waymo_infos', help='') # 创建什么格式的
-    # parser.add_argument('--runs_on', type=str, default='server', help='')  # 对应的配置文件
+    # parser.add_argument('--func', type=str, default='create_waymo_infos', help='') # 
+    # parser.add_argument('--runs_on', type=str, default='server', help='')  # 
     # args = parser.parse_args()
 
     if args.func == 'create_TJ4DRadSet_infos':  
@@ -538,12 +538,12 @@ def maintest(args):
         from pathlib import Path
         from easydict import EasyDict
         
-        dataset_cfg = EasyDict(yaml.safe_load(open(args.cfg_file)))  #加载配置我呢见
+        dataset_cfg = EasyDict(yaml.safe_load(open(args.cfg_file)))  #
 
         ROOT_DIR = (Path(__file__).resolve().parent / '../../../').resolve()
         once_data_path = ROOT_DIR / 'data' / 'TJ4DRadSet_4DRadar'
         once_save_path = ROOT_DIR / 'data' / 'TJ4DRadSet_4DRadar'
-        # 这个没有
+        # 
         if args.runs_on == 'cloud':
             once_data_path = Path('/cache/TJ4DRadSet_4DRadar/')
             once_save_path = Path('/cache/TJ4DRadSet_4DRadar/')

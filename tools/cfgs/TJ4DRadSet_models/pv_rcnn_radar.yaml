@@ -41,7 +41,7 @@ MODEL:
     MAP_TO_BEV:
         NAME: HeightCompression
         NUM_BEV_FEATURES: 256
-    # BEV 2D的特征卷积操作
+    # BEV 2D
     BACKBONE_2D:
         NAME: BaseBEVBackbone
 
@@ -50,7 +50,7 @@ MODEL:
         NUM_FILTERS: [128, 256]
         UPSAMPLE_STRIDES: [1, 2]
         NUM_UPSAMPLE_FILTERS: [256, 256]
-    #  利用 BEV 2D 的特征来进行回归 cls 和 box
+    #   BEV 2D  cls  box
     DENSE_HEAD:
         NAME: AnchorHeadSingle
         CLASS_AGNOSTIC: False
@@ -118,8 +118,8 @@ MODEL:
                 'dir_weight': 0.2,
                 'code_weights': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
             }
-    # 这个是对FPS的key point 进行特征的学习，从而得到更强的key point feature
-    # 从BEV feature map、Raw points、Voxel center point三个方面学习
+    # FPSkey point key point feature
+    # BEV feature mapRaw pointsVoxel center point
     PFE:
         NAME: VoxelSetAbstraction
         POINT_SOURCE: raw_points
@@ -153,7 +153,7 @@ MODEL:
                 MLPS: [[64, 64], [64, 64]]
                 POOL_RADIUS: [2.4, 4.8]
                 NSAMPLE: [16, 32]
-    #  对 VoxelSetAbstraction 中keypoint的点得到分数，来判断是否是前景还是背景
+    #   VoxelSetAbstraction keypoint
     POINT_HEAD:
         NAME: PointHeadSimple
         CLS_FC: [256, 256]

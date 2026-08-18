@@ -2,3 +2,16 @@ myvenv/
 __pycache__/
 *.pvc
 *.log
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+*.dylib
+*.egg-info/
+build/
+dist/
+.vscode/
+tools/.vscode/
+.venv/
+venv/

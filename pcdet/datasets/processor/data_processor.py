@@ -141,11 +141,11 @@ class DataProcessor(object):
 
         if self.voxel_generator is None:
             self.voxel_generator = VoxelGeneratorWrapper(
-                vsize_xyz=config.VOXEL_SIZE, #给定pillar的大小
+                vsize_xyz=config.VOXEL_SIZE, #pillar
                 coors_range_xyz=self.point_cloud_range,
                 num_point_features=self.num_point_features,
-                max_num_points_per_voxel=config.MAX_POINTS_PER_VOXEL, #每个pillar中最多有多少个点
-                max_num_voxels=config.MAX_NUMBER_OF_VOXELS[self.mode], #最多能有多少个pillar
+                max_num_points_per_voxel=config.MAX_POINTS_PER_VOXEL, #pillar
+                max_num_voxels=config.MAX_NUMBER_OF_VOXELS[self.mode], #pillar
             )
 
         points = data_dict['points']
@@ -170,9 +170,9 @@ class DataProcessor(object):
                 voxel_coords_list.append(coordinates)
                 voxel_num_points_list.append(num_points)
 
-            data_dict['voxels'] = voxels_list # 代表了每个生成的pillar数据，维度是[M,32,4]；
-            data_dict['voxel_coords'] = voxel_coords_list # 代表了每个生成的pillar所在的zyx轴坐标，维度是[M,3],其中z恒为0；
-            data_dict['voxel_num_points'] = voxel_num_points_list # 代表了每个生成的pillar中有多少个有效的点维度是[m,]，不满32会被0填充。
+            data_dict['voxels'] = voxels_list # pillar[M,32,4]
+            data_dict['voxel_coords'] = voxel_coords_list # pillarzyx[M,3],z0
+            data_dict['voxel_num_points'] = voxel_num_points_list # pillar[m,]320
         else:
             data_dict['voxels'] = voxels
             data_dict['voxel_coords'] = coordinates

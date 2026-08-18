@@ -63,7 +63,7 @@ class RoIHeadTemplate(nn.Module):
         """
         if batch_dict.get('rois', None) is not None:
             return batch_dict
-        # 2D 特征预测出来的框和cls做一个处理得到初始的box
+        # 2D clsbox
         batch_size = batch_dict['batch_size']
         batch_box_preds = batch_dict['batch_box_preds']
         batch_cls_preds = batch_dict['batch_cls_preds']

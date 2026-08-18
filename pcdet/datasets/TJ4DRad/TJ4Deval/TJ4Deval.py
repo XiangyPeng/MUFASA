@@ -678,7 +678,7 @@ def do_coco_style_eval(gt_annos, dt_annos, current_classes, overlap_ranges,
         mAP_aos = mAP_aos.mean(-1)
     return mAP_bbox, mAP_bev, mAP_3d, mAP_aos
 
-# 这是文件入口1, 在KITTI dataset.py 中调用就行
+# 1, KITTI dataset.py 
 def kitti_eval(gt_annos,
                dt_annos,
                current_classes,
@@ -828,7 +828,7 @@ def kitti_eval(gt_annos,
 
     return result, ret_dict
 
-# 这是文件入口2
+# 2
 def kitti_eval_coco_style(gt_annos, dt_annos, current_classes):
     """coco style evaluation of kitti.
 

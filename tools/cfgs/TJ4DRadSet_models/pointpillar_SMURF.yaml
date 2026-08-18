@@ -43,8 +43,8 @@ MODEL:
         USE_VR: True  ####################################################################################################
         USE_NORM: True
         USE_DISTANCE: False
-        USE_ELEVATION: True # 可能要去掉
-        #  下面三个是pointpillar本身的
+        USE_ELEVATION: True # 
+        #  pointpillar
         WITH_DISTANCE: False
         USE_ABSLOTE_XYZ: True
         NUM_FILTERS: [64]

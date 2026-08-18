@@ -36,10 +36,10 @@ class PFNLayer(nn.Module):
         else:
             x = self.linear(inputs)
         torch.backends.cudnn.enabled = False
-        x = self.norm(x.permute(0, 2, 1)).permute(0, 2, 1) if self.use_norm else x # 这里之所以变换维度，是因为BatchNorm1d在通道维度上进行,对于图像来说默认模式为[N,C,H*W],通道在第二个维度上。permute变换维度，(M, 64, 32) --> (M, 32, 64)
+        x = self.norm(x.permute(0, 2, 1)).permute(0, 2, 1) if self.use_norm else x # BatchNorm1d,[N,C,H*W],permute(M, 64, 32) --> (M, 32, 64)
         torch.backends.cudnn.enabled = True
         x = F.relu(x)
-        x_max = torch.max(x, dim=1, keepdim=True)[0] # 完成pointnet的最大池化操作，找出每个pillar中最能代表该pillar的点
+        x_max = torch.max(x, dim=1, keepdim=True)[0] # pointnetpillarpillar
 
         if self.last_vfe:
             return x_max
@@ -83,7 +83,7 @@ class PillarVFE(VFETemplate):
     def get_output_feature_dim(self):
         return self.num_filters[-1]
 
-    def get_paddings_indicator(self, actual_num, max_num, axis=0): # 指出一个pillar中哪些是真实数据,哪些是填充的0数据
+    def get_paddings_indicator(self, actual_num, max_num, axis=0): # pillar,0
         actual_num = torch.unsqueeze(actual_num, axis + 1)
         max_num_shape = [1] * len(actual_num.shape)
         max_num_shape[axis + 1] = -1
@@ -95,22 +95,22 @@ class PillarVFE(VFETemplate):
         
         '''
 	batch_dict:
-            points:(N,5) --> (batch_index,x,y,z,r) batch_index代表了该点云数据在当前batch中的index
-            frame_id:(batch_size,) -->帧ID-->我们存放的是npy的绝对地址，batch_size个地址
-            gt_boxes:(batch_size,N,8)--> (x,y,z,dx,dy,dz,ry,class)，
-            use_lead_xyz:(batch_size,) --> (1,1,1,1)，batch_size个1
+            points:(N,5) --> (batch_index,x,y,z,r) batch_indexbatchindex
+            frame_id:(batch_size,) -->ID-->npybatch_size
+            gt_boxes:(batch_size,N,8)--> (x,y,z,dx,dy,dz,ry,class)
+            use_lead_xyz:(batch_size,) --> (1,1,1,1)batch_size1
             voxels:(M,32,4) --> (x,y,z,r)
-            voxel_coords:(M,4) --> (batch_index,z,y,x) batch_index代表了该点云数据在当前batch中的index
-            voxel_num_points:(M,):每个voxel内的点云
-            batch_size:4：batch_size大小
+            voxel_coords:(M,4) --> (batch_index,z,y,x) batch_indexbatchindex
+            voxel_num_points:(M,):voxel
+            batch_size:4batch_size
         '''
 
 
         voxel_features, voxel_num_points, coords = batch_dict['voxels'], batch_dict['voxel_num_points'], batch_dict['voxel_coords']
-        points_mean = voxel_features[:, :, :3].sum(dim=1, keepdim=True) / voxel_num_points.type_as(voxel_features).view(-1, 1, 1) ##求每个pillar中所有点云的平均值,设置keepdim=True的，则保留原来的维度信息
-        f_cluster = voxel_features[:, :, :3] - points_mean #每个点云数据减去该点对应pillar的平均值，得到差值 xc,yc,zc
+        points_mean = voxel_features[:, :, :3].sum(dim=1, keepdim=True) / voxel_num_points.type_as(voxel_features).view(-1, 1, 1) ##pillar,keepdim=True
+        f_cluster = voxel_features[:, :, :3] - points_mean #pillar xc,yc,zc
 
-        f_center = torch.zeros_like(voxel_features[:, :, :3]) # 创建每个点云到该pillar的坐标中心点偏移量空数据 xp,yp,zp
+        f_center = torch.zeros_like(voxel_features[:, :, :3]) # pillar xp,yp,zp
         f_center[:, :, 0] = voxel_features[:, :, 0] - (coords[:, 3].to(voxel_features.dtype).unsqueeze(1) * self.voxel_x + self.x_offset)
         f_center[:, :, 1] = voxel_features[:, :, 1] - (coords[:, 2].to(voxel_features.dtype).unsqueeze(1) * self.voxel_y + self.y_offset)
         f_center[:, :, 2] = voxel_features[:, :, 2] - (coords[:, 1].to(voxel_features.dtype).unsqueeze(1) * self.voxel_z + self.z_offset)
@@ -126,10 +126,10 @@ class PillarVFE(VFETemplate):
         features = torch.cat(features, dim=-1)
 
         voxel_count = features.shape[1]
-        mask = self.get_paddings_indicator(voxel_num_points, voxel_count, axis=0) #mask中指明了每个pillar中哪些是需要被保留的数据
-        mask = torch.unsqueeze(mask, -1).type_as(voxel_features) ##features中去掉0值信息。
+        mask = self.get_paddings_indicator(voxel_num_points, voxel_count, axis=0) #maskpillar
+        mask = torch.unsqueeze(mask, -1).type_as(voxel_features) ##features0
         features *= mask
-        for pfn in self.pfn_layers: #执行上面收集的PFN层，每个pillar抽象出64维特征
+        for pfn in self.pfn_layers: #PFNpillar64
             features = pfn(features)
         features = features.squeeze()
         batch_dict['pillar_features'] = features

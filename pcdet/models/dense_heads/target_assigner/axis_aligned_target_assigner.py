@@ -15,9 +15,9 @@ class AxisAlignedTargetAssigner(object):
         self.match_height = match_height
         self.class_names = np.array(class_names)
         self.anchor_class_names = [config['class_name'] for config in anchor_generator_cfg]
-        self.pos_fraction = anchor_target_cfg.POS_FRACTION if anchor_target_cfg.POS_FRACTION >= 0 else None # 前后背景采样系数
+        self.pos_fraction = anchor_target_cfg.POS_FRACTION if anchor_target_cfg.POS_FRACTION >= 0 else None # 
         self.sample_size = anchor_target_cfg.SAMPLE_SIZE
-        self.norm_by_num_examples = anchor_target_cfg.NORM_BY_NUM_EXAMPLES # 前景权重由1/前景anchor数量
+        self.norm_by_num_examples = anchor_target_cfg.NORM_BY_NUM_EXAMPLES # 1/anchor
         self.matched_thresholds = {}
         self.unmatched_thresholds = {}
         for config in anchor_generator_cfg:
@@ -42,20 +42,20 @@ class AxisAlignedTargetAssigner(object):
 
         """
         """
-        处理一批数据中所有点云的anchors和gt_boxes，
-        计算每个anchor属于前景还是背景，
-        为每个前景的anchor分配类别和计算box的回归残差和回归权重
+        anchorsgt_boxes
+        anchor
+        anchorbox
         Args:
             all_anchors: [(N, 7), ...]
-            gt_boxes_with_classes: (B, M, 8)  # 最后维度数据为 (x, y, z, w, l, h, θ，class)
+            gt_boxes_with_classes: (B, M, 8)  #  (x, y, z, w, l, h, θclass)
         Returns:
             all_targets_dict = {
-                # 每个anchor的类别
-                'box_cls_labels': cls_labels, # (batch_size，num_of_anchors）
-                # 每个anchor的回归残差 -->（∆x, ∆y, ∆z, ∆l, ∆w, ∆h, ∆θ）
-                'box_reg_targets': bbox_targets, # (batch_size，num_of_anchors，7）
-                # 每个box的回归权重
-                'reg_weights': reg_weights # (batch_size，num_of_anchors）
+                # anchor
+                'box_cls_labels': cls_labels, # (batch_sizenum_of_anchors
+                # anchor -->∆x, ∆y, ∆z, ∆l, ∆w, ∆h, ∆θ
+                'box_reg_targets': bbox_targets, # (batch_sizenum_of_anchors7
+                # box
+                'reg_weights': reg_weights # (batch_sizenum_of_anchors
             }
         """
         bbox_targets = []
@@ -67,27 +67,27 @@ class AxisAlignedTargetAssigner(object):
         gt_boxes = gt_boxes_with_classes[:, :, :-1]
         for k in range(batch_size):
             cur_gt = gt_boxes[k]
-            cnt = cur_gt.__len__() - 1 #最后面的一个gt
+            cnt = cur_gt.__len__() - 1 #gt
             """
-            由于在OpenPCDet的数据预处理时，以一批数据中拥有GT数量最多的帧为基准，
-            其他帧中GT数量不足，则会进行补0操作，使其成为一个矩阵，例：
+            OpenPCDetGT
+            GT0
             [
                 [1,1,2,2,3,2],
                 [2,2,3,1,0,0],
                 [3,1,2,0,0,0]
             ]
-            因此这里从每一行的倒数第二个类别开始判断，
-            截取最后一个非零元素的索引，来取出当前帧中真实的GT数据
+            
+            GT
             """
             while cnt > 0 and cur_gt[cnt].sum() == 0:
                 cnt -= 1
-            cur_gt = cur_gt[:cnt + 1] #取出当前帧中的所有gt
-            cur_gt_classes = gt_classes[k][:cnt + 1].int() #取出当前帧中的类别
+            cur_gt = cur_gt[:cnt + 1] #gt
+            cur_gt_classes = gt_classes[k][:cnt + 1].int() #
 
             target_list = []
-            #按照类别遍历所有的anchors
+            #anchors
             for anchor_class_name, anchors in zip(self.anchor_class_names, all_anchors):
-                if cur_gt_classes.shape[0] > 1: #取出gt中当前的类别
+                if cur_gt_classes.shape[0] > 1: #gt
                     mask = torch.from_numpy(self.class_names[cur_gt_classes.cpu() - 1] == anchor_class_name)
                 else:
                     mask = torch.tensor([self.class_names[c - 1] == anchor_class_name
@@ -160,7 +160,7 @@ class AxisAlignedTargetAssigner(object):
     def assign_targets_single(self, anchors, gt_boxes, gt_classes, matched_threshold=0.6, unmatched_threshold=0.45):
         num_anchors = anchors.shape[0] #216 * 248 = 107136
         num_gt = gt_boxes.shape[0]
-        # 初始化anchor对应的label和gt_id ，并置为 -1，-1表示loss计算时候不会被考虑，背景的类别被设置为0
+        # anchorlabelgt_id  -1-1loss0
         labels = torch.ones((num_anchors,), dtype=torch.int32, device=anchors.device) * -1
         gt_ids = torch.ones((num_anchors,), dtype=torch.int32, device=anchors.device) * -1
 
@@ -170,31 +170,31 @@ class AxisAlignedTargetAssigner(object):
 
             # NOTE: The speed of these two versions depends the environment and the number of anchors
             # anchor_to_gt_argmax = torch.from_numpy(anchor_by_gt_overlap.cpu().numpy().argmax(axis=1)).cuda()
-            anchor_to_gt_argmax = anchor_by_gt_overlap.argmax(dim=1) # 得到每一个anchor与哪个的GT的的iou最大
-            anchor_to_gt_max = anchor_by_gt_overlap[torch.arange(num_anchors, device=anchors.device), anchor_to_gt_argmax] # anchor_to_gt_max得到每一个anchor最匹配的gt的iou数值
+            anchor_to_gt_argmax = anchor_by_gt_overlap.argmax(dim=1) # anchorGTiou
+            anchor_to_gt_max = anchor_by_gt_overlap[torch.arange(num_anchors, device=anchors.device), anchor_to_gt_argmax] # anchor_to_gt_maxanchorgtiou
 
             # gt_to_anchor_argmax = torch.from_numpy(anchor_by_gt_overlap.cpu().numpy().argmax(axis=0)).cuda()
-            gt_to_anchor_argmax = anchor_by_gt_overlap.argmax(dim=0) # 得到每个gt最匹配的anchor索引
-            gt_to_anchor_max = anchor_by_gt_overlap[gt_to_anchor_argmax, torch.arange(num_gt, device=anchors.device)] # 找到每个gt最匹配anchor的iou
+            gt_to_anchor_argmax = anchor_by_gt_overlap.argmax(dim=0) # gtanchor
+            gt_to_anchor_max = anchor_by_gt_overlap[gt_to_anchor_argmax, torch.arange(num_gt, device=anchors.device)] # gtanchoriou
             empty_gt_mask = gt_to_anchor_max == 0
             gt_to_anchor_max[empty_gt_mask] = -1
 
             anchors_with_max_overlap = (anchor_by_gt_overlap == gt_to_anchor_max).nonzero()[:, 0]
-            gt_inds_force = anchor_to_gt_argmax[anchors_with_max_overlap] # 得到这些最匹配anchor与该类别的哪个GT索引相对应
-            labels[anchors_with_max_overlap] = gt_classes[gt_inds_force] # 将gt的类别赋值到对应的anchor的label中
-            gt_ids[anchors_with_max_overlap] = gt_inds_force.int() # 将gt的索引也赋值到对应的anchors的gt_ids中
+            gt_inds_force = anchor_to_gt_argmax[anchors_with_max_overlap] # anchorGT
+            labels[anchors_with_max_overlap] = gt_classes[gt_inds_force] # gtanchorlabel
+            gt_ids[anchors_with_max_overlap] = gt_inds_force.int() # gtanchorsgt_ids
 
-            pos_inds = anchor_to_gt_max >= matched_threshold  # 根据matched_threshold和unmatched_threshold以及anchor_to_gt_max计算前景和背景索引，并更新labels和gt_ids
-            gt_inds_over_thresh = anchor_to_gt_argmax[pos_inds] # 找到最匹配的anchor中iou大于给定阈值的mask
-            labels[pos_inds] = gt_classes[gt_inds_over_thresh] # 将pos anchor对应gt的类别赋值到对应的anchor的label中
-            gt_ids[pos_inds] = gt_inds_over_thresh.int() # 将pos anchor对应gt的索引赋值到对应的anchor的gt_id中
-            bg_inds = (anchor_to_gt_max < unmatched_threshold).nonzero()[:, 0] # 找到背景anchor索引
+            pos_inds = anchor_to_gt_max >= matched_threshold  # matched_thresholdunmatched_thresholdanchor_to_gt_maxlabelsgt_ids
+            gt_inds_over_thresh = anchor_to_gt_argmax[pos_inds] # anchorioumask
+            labels[pos_inds] = gt_classes[gt_inds_over_thresh] # pos anchorgtanchorlabel
+            gt_ids[pos_inds] = gt_inds_over_thresh.int() # pos anchorgtanchorgt_id
+            bg_inds = (anchor_to_gt_max < unmatched_threshold).nonzero()[:, 0] # anchor
         else:
             bg_inds = torch.arange(num_anchors, device=anchors.device)
 
-        fg_inds = (labels > 0).nonzero()[:, 0] # 到目前为止得到哪些anchor是前景和哪些anchor是背景
+        fg_inds = (labels > 0).nonzero()[:, 0] # anchoranchor
 
-        if self.pos_fraction is not None: # 对anchor的前景和背景进行筛选和赋值
+        if self.pos_fraction is not None: # anchor
             num_fg = int(self.pos_fraction * self.sample_size)
             if len(fg_inds) > num_fg:
                 num_disabled = len(fg_inds) - num_fg
@@ -208,13 +208,13 @@ class AxisAlignedTargetAssigner(object):
                 labels[enable_inds] = 0
             # bg_inds = torch.nonzero(labels == 0)[:, 0]
         else:
-            if len(gt_boxes) == 0 or anchors.shape[0] == 0: # 如果该类别没有GT的话，将该类别的全部label置0，即所有anchor都是背景类别
+            if len(gt_boxes) == 0 or anchors.shape[0] == 0: # GTlabel0anchor
                 labels[:] = 0
-            else:# anchor与GT的iou小于unmatched_threshold的anchor的类别设置类背景类别
+            else:# anchorGTiouunmatched_thresholdanchor
                 labels[bg_inds] = 0
                 labels[anchors_with_max_overlap] = gt_classes[gt_inds_force]
 
-        bbox_targets = anchors.new_zeros((num_anchors, self.box_coder.code_size)) #  初始化每个anchor的7个回归参数，并设置为0数值
+        bbox_targets = anchors.new_zeros((num_anchors, self.box_coder.code_size)) #  anchor70
         if len(gt_boxes) > 0 and anchors.shape[0] > 0:
             fg_gt_boxes = gt_boxes[anchor_to_gt_argmax[fg_inds], :]
             fg_anchors = anchors[fg_inds, :]
@@ -227,7 +227,7 @@ class AxisAlignedTargetAssigner(object):
             num_examples = num_examples if num_examples > 1.0 else 1.0
             reg_weights[labels > 0] = 1.0 / num_examples
         else:
-            reg_weights[labels > 0] = 1.0  # 将前景anchor的回归权重设置为1
+            reg_weights[labels > 0] = 1.0  # anchor1
 
         ret_dict = {
             'box_cls_labels': labels,

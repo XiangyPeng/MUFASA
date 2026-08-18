@@ -20,24 +20,24 @@ class AnchorGenerator(object):
         num_anchors_per_location = []
         for grid_size, anchor_size, anchor_rotation, anchor_height, align_center in zip(
                 grid_sizes, self.anchor_sizes, self.anchor_rotations, self.anchor_heights, self.align_center):
-            #2 * 3 * 1，每个点返回6个anchor
+            #2 * 3 * 16anchor
             num_anchors_per_location.append(len(anchor_rotation) * len(anchor_size) * len(anchor_height))
             if align_center:
                 x_stride = (self.anchor_range[3] - self.anchor_range[0]) / grid_size[0]
                 y_stride = (self.anchor_range[4] - self.anchor_range[1]) / grid_size[1]
                 x_offset, y_offset = x_stride / 2, y_stride / 2
             else:
-                #计算每个网格的在点云空间中的实际大小
-                # 用于将每个anchor映射回实际点云中的大小
+                #
+                # anchor
                 x_stride = (self.anchor_range[3] - self.anchor_range[0]) / (grid_size[0] - 1)
                 y_stride = (self.anchor_range[4] - self.anchor_range[1]) / (grid_size[1] - 1)
                 x_offset, y_offset = 0, 0
-            #生成anchor的位置，这里使用的实际尺寸，单位米
-             # 产生x坐标 --> 216个点 [0, 69.12]
+            #anchor
+             # x --> 216 [0, 69.12]
             x_shifts = torch.arange(
                 self.anchor_range[0] + x_offset, self.anchor_range[3] + 1e-5, step=x_stride, dtype=torch.float32,
             ).cuda()
-            # 产生y坐标 --> 248个点 [0, 79.36]
+            # y --> 248 [0, 79.36]
             y_shifts = torch.arange(
                 self.anchor_range[1] + y_offset, self.anchor_range[4] + 1e-5, step=y_stride, dtype=torch.float32,
             ).cuda()
@@ -49,19 +49,19 @@ class AnchorGenerator(object):
             x_shifts, y_shifts, z_shifts = torch.meshgrid([
                 x_shifts, y_shifts, z_shifts
             ])  # [x_grid, y_grid, z_grid]
-            anchors = torch.stack((x_shifts, y_shifts, z_shifts), dim=-1)   # [x, y, z, 3]，([216, 248, 1, 3])
+            anchors = torch.stack((x_shifts, y_shifts, z_shifts), dim=-1)   # [x, y, z, 3]([216, 248, 1, 3])
             anchors = anchors[:, :, :, None, :].repeat(1, 1, 1, anchor_size.shape[0], 1)
             anchor_size = anchor_size.view(1, 1, 1, -1, 3).repeat([*anchors.shape[0:3], 1, 1])
-            anchors = torch.cat((anchors, anchor_size), dim=-1) #加入尺寸
-            anchors = anchors[:, :, :, :, None, :].repeat(1, 1, 1, 1, num_anchor_rotation, 1) #加入旋转
+            anchors = torch.cat((anchors, anchor_size), dim=-1) #
+            anchors = anchors[:, :, :, :, None, :].repeat(1, 1, 1, 1, num_anchor_rotation, 1) #
             anchor_rotation = anchor_rotation.view(1, 1, 1, 1, -1, 1).repeat([*anchors.shape[0:3], num_anchor_size, 1, 1])
             anchors = torch.cat((anchors, anchor_rotation), dim=-1)  # [x, y, z, num_size, num_rot, 7]
 
-            anchors = anchors.permute(2, 1, 0, 3, 4, 5).contiguous() # anchors 的大小([1, 248, 216, 1, 2, 7])，（z, y, x, l, w, h, theta）
+            anchors = anchors.permute(2, 1, 0, 3, 4, 5).contiguous() # anchors ([1, 248, 216, 1, 2, 7])z, y, x, l, w, h, theta
             #anchors = anchors.view(-1, anchors.shape[-1])
             anchors[..., 2] += anchors[..., 5] / 2  # shift to box centers
             all_anchors.append(anchors)
-        return all_anchors, num_anchors_per_location #all_anchors按照类别组成anchors
+        return all_anchors, num_anchors_per_location #all_anchorsanchors
 
 
 if __name__ == '__main__':

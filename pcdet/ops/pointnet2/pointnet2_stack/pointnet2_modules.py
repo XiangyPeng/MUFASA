@@ -98,14 +98,14 @@ class StackSAModuleMSG(nn.Module):
 
     def forward(self, xyz, xyz_batch_cnt, new_xyz, new_xyz_batch_cnt, features=None, empty_voxel_set_zeros=True):
         """
-        :param xyz: (N1 + N2 ..., 3) tensor of the xyz coordinates of the features  Keypoint 的点
+        :param xyz: (N1 + N2 ..., 3) tensor of the xyz coordinates of the features  Keypoint 
         :param xyz_batch_cnt: (batch_size), [N1, N2, ...]
         :param new_xyz: (M1 + M2 ..., 3)
         :param new_xyz_batch_cnt: (batch_size), [M1, M2, ...]
-        :param features: (N1 + N2 ..., C) tensor of the descriptors of the the features  Keypoint 的点特征
+        :param features: (N1 + N2 ..., C) tensor of the descriptors of the the features  Keypoint 
         :return:
             new_xyz: (M1 + M2 ..., 3) tensor of the new features' xyz
-            new_features: (M1 + M2 ..., \sum_k(mlps[k][-1])) tensor of the new_features descriptors
+            new_features: (M1 + M2 ..., \\sum_k(mlps[k][-1])) tensor of the new_features descriptors
         """
         new_features_list = []
         for k in range(len(self.groupers)):
@@ -210,14 +210,14 @@ class StackSAModuleMSG_pattern(nn.Module):
 
     def forward(self, xyz, xyz_batch_cnt, new_xyz, new_xyz_batch_cnt, features=None, empty_voxel_set_zeros=True):
         """
-        :param xyz: (N1 + N2 ..., 3) tensor of the xyz coordinates of the features  Keypoint 的点
+        :param xyz: (N1 + N2 ..., 3) tensor of the xyz coordinates of the features  Keypoint 
         :param xyz_batch_cnt: (batch_size), [N1, N2, ...]
         :param new_xyz: (M1 + M2 ..., 3)
         :param new_xyz_batch_cnt: (batch_size), [M1, M2, ...]
-        :param features: (N1 + N2 ..., C) tensor of the descriptors of the the features  Keypoint 的点特征
+        :param features: (N1 + N2 ..., C) tensor of the descriptors of the the features  Keypoint 
         :return:
             new_xyz: (M1 + M2 ..., 3) tensor of the new features' xyz
-            new_features: (M1 + M2 ..., \sum_k(mlps[k][-1])) tensor of the new_features descriptors
+            new_features: (M1 + M2 ..., \\sum_k(mlps[k][-1])) tensor of the new_features descriptors
         """
         new_features_list = []
         for k in range(len(self.groupers)):
@@ -225,7 +225,7 @@ class StackSAModuleMSG_pattern(nn.Module):
                 xyz, xyz_batch_cnt, new_xyz, new_xyz_batch_cnt, features
             )  # (M1 + M2, C, nsample)
             new_features = new_features.permute(1, 0, 2).unsqueeze(dim=0)  # (1, C, M1 + M2 ..., nsample)
-            # 这边进行一个位置编码
+            # 
             #  value_pattern : B*N,3
             point_pattern_feature = self.mlps_pattern[k](value_pattern)
             new_features = self.mlps[k](new_features)  # (1, C, M1 + M2 ..., nsample)
@@ -531,7 +531,7 @@ class VectorPoolAggregationModule(nn.Module):
         :param features: (N1 + N2 ..., C) tensor of the descriptors of the the features
         :return:
             new_xyz: (M1 + M2 ..., 3) tensor of the new features' xyz
-            new_features: (M1 + M2 ..., \sum_k(mlps[k][-1])) tensor of the new_features descriptors
+            new_features: (M1 + M2 ..., \\sum_k(mlps[k][-1])) tensor of the new_features descriptors
         """
         N, C = features.shape
 

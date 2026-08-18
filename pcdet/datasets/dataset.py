@@ -229,12 +229,12 @@ class DatasetTemplate(torch_data.Dataset):
 
         for key, val in data_dict.items():
             try:
-                if key in ['voxels', 'voxel_num_points']: # vovel 处理
+                if key in ['voxels', 'voxel_num_points']: # vovel 
                     if isinstance(val[0], list):
                         batch_size_ratio = len(val[0])
                         val = [i for item in val for i in item]
                     ret[key] = np.concatenate(val, axis=0)
-                elif key in ['points', 'voxel_coords']: # point 处理
+                elif key in ['points', 'voxel_coords']: # point 
                     coors = []
                     if isinstance(val[0], list):
                         val =  [i for item in val for i in item]
@@ -242,7 +242,7 @@ class DatasetTemplate(torch_data.Dataset):
                         coor_pad = np.pad(coor, ((0, 0), (1, 0)), mode='constant', constant_values=i)
                         coors.append(coor_pad)
                     ret[key] = np.concatenate(coors, axis=0)
-                elif key in ['gt_boxes']:               # gt 处理
+                elif key in ['gt_boxes']:               # gt 
                     max_gt = max([len(x) for x in val])
                     batch_gt_boxes3d = np.zeros((batch_size, max_gt, val[0].shape[-1]), dtype=np.float32)
                     for k in range(batch_size):

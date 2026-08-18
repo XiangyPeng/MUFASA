@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-#BACKBONE_2D的输入特征维度（batch_size，64, 432, 496），输出的特征维度为[batch_size, 384, 248, 216]
+#BACKBONE_2Dbatch_size64, 432, 496[batch_size, 384, 248, 216]
 class BaseBEVBackbone(nn.Module):
     def __init__(self, model_cfg, input_channels):# input_channels = 64
         super().__init__()
@@ -16,7 +16,7 @@ class BaseBEVBackbone(nn.Module):
         else:
             layer_nums = layer_strides = num_filters = []
 
-        # 上采样参数
+        # 
         if self.model_cfg.get('UPSAMPLE_STRIDES', None) is not None:
             assert len(self.model_cfg.UPSAMPLE_STRIDES) == len(self.model_cfg.NUM_UPSAMPLE_FILTERS)
             num_upsample_filters = self.model_cfg.NUM_UPSAMPLE_FILTERS
@@ -24,13 +24,13 @@ class BaseBEVBackbone(nn.Module):
         else:
             upsample_strides = num_upsample_filters = []
 
-        num_levels = len(layer_nums) #3层
+        num_levels = len(layer_nums) #3
         c_in_list = [input_channels, *num_filters[:-1]]
         self.blocks = nn.ModuleList()
         self.deblocks = nn.ModuleList()
 
-        # 开始处理3层网络
-        # 通道数分别为：# (64,64)-->(64,128)-->(128,256) 
+        # 3
+        # # (64,64)-->(64,128)-->(128,256) 
         for idx in range(num_levels):
             cur_layers = [
                 nn.ZeroPad2d(1),
@@ -41,17 +41,17 @@ class BaseBEVBackbone(nn.Module):
                 nn.BatchNorm2d(num_filters[idx], eps=1e-3, momentum=0.01),
                 nn.ReLU()
             ]
-            #需要说明的是，经过这里的层，feature map大小不变  
+            #feature map  
             for k in range(layer_nums[idx]):
                 cur_layers.extend([
                     nn.Conv2d(num_filters[idx], num_filters[idx], kernel_size=3, padding=1, bias=False),
                     nn.BatchNorm2d(num_filters[idx], eps=1e-3, momentum=0.01),
                     nn.ReLU()
                 ])
-            #添加下采样层
+            #
             self.blocks.append(nn.Sequential(*cur_layers))
 
-            #上采样，upsample_strides：[1, 2, 4]
+            #upsample_strides[1, 2, 4]
             if len(upsample_strides) > 0:
                 stride = upsample_strides[idx]
                 if stride > 1 or (stride == 1 and not self.model_cfg.get('USE_CONV_FOR_NO_STRIDE', False)):
@@ -96,22 +96,22 @@ class BaseBEVBackbone(nn.Module):
         spatial_features = data_dict['spatial_features']
         ups = []
         ret_dict = {}
-        x = spatial_features #输入维度：[batch_size, 64, 496, 432]
+        x = spatial_features #[batch_size, 64, 496, 432]
         for i in range(len(self.blocks)):
-            # 下采样
+            # 
             x = self.blocks[i](x)
-            #下采样之后，x的shape分别为：torch.Size([batch_size, 64, 248, 216])，torch.Size([batch_size, 128, 124, 108])，torch.Size([batch_size, 256, 62, 54])
+            #xshapetorch.Size([batch_size, 64, 248, 216])torch.Size([batch_size, 128, 124, 108])torch.Size([batch_size, 256, 62, 54])
             stride = int(spatial_features.shape[2] / x.shape[2])
             ret_dict['spatial_features_%dx' % stride] = x
-            # 上采样
-            #上采样不影响x的值，上采样后的值在ups中，ups中的元素维度都是：torch.Size([batch_size, 128, 248, 216])
+            # 
+            #xupsupstorch.Size([batch_size, 128, 248, 216])
             if len(self.deblocks) > 0:
                 ups.append(self.deblocks[i](x))
             else:
                 ups.append(x)
 
         if len(ups) > 1:
-            x = torch.cat(ups, dim=1) #将上采样结果在通道维度上拼接
+            x = torch.cat(ups, dim=1) #
         elif len(ups) == 1:
             x = ups[0]
 
@@ -120,7 +120,7 @@ class BaseBEVBackbone(nn.Module):
 
         data_dict['spatial_features_2d'] = x
 
-        return data_dict #输出维度：[batch_size, 384, 248, 216]，特征更多，尺度减小为原先的一半
+        return data_dict #[batch_size, 384, 248, 216]
 
 
 class BaseBEVBackboneV1(nn.Module):
